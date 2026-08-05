@@ -1747,24 +1747,27 @@ def create_gradio_interface():
 # 启动函数
 # ============================================================
 def start_server():
-    """启动FastAPI服务"""
+    """启动服务（Gradio优先模式，适配Hugging Face Spaces）"""
     logger.info("Octuplex 后端服务正在启动...")
     logger.info(f"LLM接口: {config.LLM_BASE_URL}")
     logger.info(f"模型: {config.LLM_MODEL_NAME}")
     logger.info(f"CORS白名单: {config.CORS_ORIGINS}")
     logger.info(f"沙盒目录: {config.SANDBOX_WORK_DIR}")
 
-    # 如果启用Gradio，则同时启动Gradio
+    # 如果启用Gradio，以Gradio作为主服务启动（适配HF Spaces）
     if config.ENABLE_GRADIO:
         gradio_demo = create_gradio_interface()
         if gradio_demo:
-            from fastapi.middleware.wsgi import WSGIMiddleware
-            import gradio as gr
-            # 将Gradio挂载到 /gradio 路径
-            gr.mount_gradio_app(app, gradio_demo, path="/gradio")
-            logger.info("Gradio管理面板已启用: /gradio")
+            logger.info("以Gradio模式启动（适配Hugging Face Spaces）...")
+            gradio_demo.queue(max_size=20).launch(
+                server_name="0.0.0.0",
+                server_port=7860,
+                share=False,
+                show_error=True
+            )
+            return
 
-    # 启动uvicorn
+    # 回退：纯FastAPI模式（uvicorn）
     uvicorn.run(
         app,
         host=config.SERVER_HOST,

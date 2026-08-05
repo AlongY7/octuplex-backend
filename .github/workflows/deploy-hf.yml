@@ -11,45 +11,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Create HF Space
+      - name: Create HF Space (Gradio SDK)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pip install requests huggingface_hub --quiet
+          pip install requests --quiet
           python3 << 'PYEOF'
-          import requests, json, os
-          from huggingface_hub import create_repo
+          import requests, os
           
           token = os.environ["HF_TOKEN"]
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
           
-          # 方法1: 用 huggingface_hub create_repo
-          print("创建 Space: alongy7/octuplex-backend")
-          try:
-              url = create_repo(
-                  repo_id="alongy7/octuplex-backend",
-                  repo_type="space",
-                  space_sdk="docker",
-                  token=token,
-                  exist_ok=True
-              )
-              print(f"✅ Space 已就绪: {url}")
-          except Exception as e:
-              print(f"create_repo 异常: {e}")
-              # 方法2: 用 REST API
-              headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-              r = requests.post(
-                  "https://huggingface.co/api/repos/create",
-                  headers=headers,
-                  json={
-                      "name": "octuplex-backend",
-                      "type": "space",
-                      "sdk": "docker",
-                      "private": False
-                  }
-              )
-              print(f"REST API HTTP {r.status_code}: {r.text[:200]}")
-              if r.status_code == 200:
-                  print("✅ Space 已创建！")
+          # 用 Gradio SDK（免费）创建 Space
+          print("创建 Space: alongy7/octuplex-backend (Gradio SDK)")
+          r = requests.post(
+              "https://huggingface.co/api/repos/create",
+              headers=headers,
+              json={
+                  "name": "octuplex-backend",
+                  "type": "space",
+                  "sdk": "gradio",
+                  "private": False
+              }
+          )
+          print(f"HTTP {r.status_code}: {r.text[:300]}")
+          
+          if r.status_code in (200, 201):
+              print("✅ Space 已创建！")
+          elif r.status_code == 409:
+              print("✅ Space 已存在！")
+          else:
+              print(f"❌ 创建失败: {r.text}")
+              exit(1)
           PYEOF
 
       - name: Upload Files to HF Space
@@ -92,7 +85,7 @@ jobs:
           
           for key, value in variables.items():
               r = requests.post(
-                  "https://huggingface.co/api/repos/alongy7/octuplex-backend/secrets",
+                  "https://huggingface.co/api/spaces/alongy7/octuplex-backend/secrets",
                   headers=headers,
                   json={"key": key, "value": value}
               )
