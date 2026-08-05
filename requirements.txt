@@ -1,0 +1,62 @@
+# ============================================================
+# Octuplex 后端依赖清单
+# 安装命令：pip install -r requirements.txt --break-system-packages
+# ============================================================
+
+# ---- 核心Web框架 ----
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-multipart==0.0.12
+gradio==4.44.0
+
+# ---- WebSocket支持 ----
+websockets==13.0
+
+# ---- 智能体引擎 ----
+langchain==0.3.0
+langchain-core==0.3.0
+langchain-openai==0.2.0
+langgraph==0.2.0
+
+# ---- 向量数据库（长期记忆 + RAG知识库） ----
+chromadb==0.5.5
+sentence-transformers==3.1.0
+
+# ---- 异步HTTP客户端（联网搜索、网页爬取） ----
+httpx==0.27.0
+beautifulsoup4==4.12.3
+lxml==5.3.0
+
+# ---- 文档解析（多格式文件处理） ----
+PyPDF2==3.0.1
+python-docx==1.1.2
+openpyxl==3.1.5
+python-pptx==0.6.23
+pytesseract==0.3.10
+Pillow==10.4.0
+
+# ---- 数据处理与可视化 ----
+pandas==2.2.2
+numpy==1.26.4
+matplotlib==3.9.2
+plotly==5.23.0
+
+# ---- 定时任务调度 ----
+APScheduler==3.10.4
+
+# ---- 工具库 ----
+python-dotenv==1.0.1
+pydantic==2.9.0
+pydantic-settings==2.5.0
+
+# ---- 代码高亮（服务端日志格式化） ----
+Pygments==2.18.0
+
+# ---- Git操作（PyGithub） ----
+PyGithub==2.3.0
+
+# ---- 搜索引擎 ----
+duckduckgo-search==6.1.12
+
+# ---- 日志轮转 ----
+# (使用Python内置logging.handlers，无需额外依赖)

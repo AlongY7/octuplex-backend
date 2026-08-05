@@ -1,0 +1,8 @@
+{
+  "name": "doc_parser",
+  "version": "1.0.0",
+  "description": "文档解析技能：多格式文档解析（PDF/Word/Excel/TXT/图片OCR），内容提取与格式转换",
+  "author": "Octuplex",
+  "enabled": true,
+  "tools": ["parse_pdf", "parse_docx", "parse_xlsx", "parse_csv", "parse_image"]
+}

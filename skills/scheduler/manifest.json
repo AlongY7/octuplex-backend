@@ -1,0 +1,8 @@
+{
+  "name": "scheduler",
+  "version": "1.0.0",
+  "description": "定时任务技能：Cron表达式配置定时目标任务，后台按时自动触发执行",
+  "author": "Octuplex",
+  "enabled": true,
+  "tools": ["cron_add", "cron_remove", "cron_list", "cron_validate"]
+}

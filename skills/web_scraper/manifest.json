@@ -1,0 +1,8 @@
+{
+  "name": "web_scraper",
+  "version": "1.0.0",
+  "description": "浏览器自动化技能：网页访问、内容爬取、页面数据提取、静态页面解析",
+  "author": "Octuplex",
+  "enabled": true,
+  "tools": ["web_fetch", "web_extract", "web_parse"]
+}

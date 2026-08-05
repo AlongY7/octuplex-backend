@@ -1,0 +1,50 @@
+# Octuplex Git 忽略规则
+# 环境变量（包含敏感密钥）
+.env
+
+# Python缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+venv/
+env/
+.venv/
+
+# 沙盒工作目录
+sandbox_workspace/
+
+# 向量数据库
+chroma_db/
+
+# 日志文件
+logs/
+*.log
+
+# 上传文件临时目录
+uploads/
+temp/
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 分发文件
+dist/
+build/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 自定义忽略
+*.bak
+*.tmp
