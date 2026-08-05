@@ -15,34 +15,41 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pip install requests --quiet
+          pip install requests huggingface_hub --quiet
           python3 << 'PYEOF'
           import requests, json, os
+          from huggingface_hub import create_repo
           
           token = os.environ["HF_TOKEN"]
-          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
           
-          # 用 REST API 创建 Space
-          print("通过 REST API 创建 Space...")
-          data = {
-              "name": "octuplex-backend",
-              "sdk": "docker",
-              "hardware": "cpu-basic",
-              "private": False,
-              "secrets": {}
-          }
-          
-          r = requests.post(
-              "https://huggingface.co/api/spaces",
-              headers=headers,
-              json=data
-          )
-          
-          print(f"HTTP {r.status_code}: {r.text[:300]}")
-          if r.status_code in (200, 201, 409):
-              print("✅ Space 已就绪！")
-          else:
-              print(f"⚠️ 响应: {r.text}")
+          # 方法1: 用 huggingface_hub create_repo
+          print("创建 Space: alongy7/octuplex-backend")
+          try:
+              url = create_repo(
+                  repo_id="alongy7/octuplex-backend",
+                  repo_type="space",
+                  space_sdk="docker",
+                  token=token,
+                  exist_ok=True
+              )
+              print(f"✅ Space 已就绪: {url}")
+          except Exception as e:
+              print(f"create_repo 异常: {e}")
+              # 方法2: 用 REST API
+              headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+              r = requests.post(
+                  "https://huggingface.co/api/repos/create",
+                  headers=headers,
+                  json={
+                      "name": "octuplex-backend",
+                      "type": "space",
+                      "sdk": "docker",
+                      "private": False
+                  }
+              )
+              print(f"REST API HTTP {r.status_code}: {r.text[:200]}")
+              if r.status_code == 200:
+                  print("✅ Space 已创建！")
           PYEOF
 
       - name: Upload Files to HF Space
@@ -72,12 +79,11 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python3 << 'PYEOF'
-          import requests, json, os
+          import requests, os
           
           token = os.environ["HF_TOKEN"]
           headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
           
-          # 设置 Space 环境变量
           variables = {
               "CORS_ORIGINS": "https://alongy7.github.io",
               "SERVER_PORT": "7860",
@@ -86,7 +92,7 @@ jobs:
           
           for key, value in variables.items():
               r = requests.post(
-                  f"https://huggingface.co/api/spaces/alongy7/octuplex-backend/secrets",
+                  "https://huggingface.co/api/repos/alongy7/octuplex-backend/secrets",
                   headers=headers,
                   json={"key": key, "value": value}
               )
