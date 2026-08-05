@@ -22,8 +22,8 @@ jobs:
           token = os.environ["HF_TOKEN"]
           headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
           
-          # 用 Gradio SDK（免费）创建 Space
-          print("创建 Space: alongy7/octuplex-backend (Gradio SDK)")
+          # 用 Gradio SDK + ZeroGPU（免费）创建 Space
+          print("创建 Space: alongy7/octuplex-backend (Gradio + ZeroGPU)")
           r = requests.post(
               "https://huggingface.co/api/repos/create",
               headers=headers,
@@ -31,6 +31,7 @@ jobs:
                   "name": "octuplex-backend",
                   "type": "space",
                   "sdk": "gradio",
+                  "hardware": "zero-a10g",
                   "private": False
               }
           )
@@ -43,6 +44,35 @@ jobs:
           else:
               print(f"❌ 创建失败: {r.text}")
               exit(1)
+          PYEOF
+
+      - name: Configure Space Hardware (ZeroGPU)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python3 << 'PYEOF'
+          import requests, os
+          
+          token = os.environ["HF_TOKEN"]
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+          
+          # 设置硬件为 ZeroGPU
+          print("配置 Space 硬件: zero-a10g (ZeroGPU)")
+          r = requests.post(
+              "https://huggingface.co/api/spaces/alongy7/octuplex-backend/hardware",
+              headers=headers,
+              json={"hardware": "zero-a10g"}
+          )
+          print(f"硬件配置: HTTP {r.status_code} - {r.text[:200]}")
+          
+          # 设置运行时
+          r2 = requests.post(
+              "https://huggingface.co/api/spaces/alongy7/octuplex-backend/runtime",
+              headers=headers,
+              json={"runtime": "gradio"}
+          )
+          print(f"运行时配置: HTTP {r2.status_code} - {r2.text[:200]}")
+          print("✅ Space 配置完成！")
           PYEOF
 
       - name: Upload Files to HF Space
