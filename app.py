@@ -108,8 +108,8 @@ class Config:
     MAX_TOOL_CALLS_PER_TASK = int(os.getenv("MAX_TOOL_CALLS_PER_TASK", "50"))
     MAX_RETRIES_PER_TASK = int(os.getenv("MAX_RETRIES_PER_TASK", "5"))
 
-    # 服务
-    SERVER_PORT = int(os.getenv("SERVER_PORT", "7860"))
+    # 服务（Render 会注入 PORT 环境变量，优先使用）
+    SERVER_PORT = int(os.getenv("PORT") or os.getenv("SERVER_PORT", "7860"))
     SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
     ENABLE_GRADIO = os.getenv("ENABLE_GRADIO", "true").lower() == "true"
 
@@ -1761,7 +1761,7 @@ def start_server():
             logger.info("以Gradio模式启动（适配Hugging Face Spaces）...")
             gradio_demo.queue(max_size=20).launch(
                 server_name="0.0.0.0",
-                server_port=7860,
+                server_port=config.SERVER_PORT,
                 share=False,
                 show_error=True
             )

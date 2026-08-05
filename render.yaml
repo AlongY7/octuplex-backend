@@ -1,0 +1,36 @@
+# ============================================================
+# Render Blueprint 配置文件
+# 自动检测：Render 会读取此文件并自动配置服务
+# 文档：https://render.com/docs/blueprint-spec
+# ============================================================
+
+services:
+  - type: web
+    name: octuplex-backend
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt --break-system-packages
+    startCommand: python app.py
+    healthCheckPath: /health
+    envVars:
+      - key: SERVER_PORT
+        value: "10000"
+      - key: SERVER_HOST
+        value: "0.0.0.0"
+      - key: CORS_ORIGINS
+        value: "https://alongy7.github.io"
+      - key: ENABLE_GRADIO
+        value: "false"
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        sync: false
+      - key: LLM_MODEL_NAME
+        sync: false
+      - key: SANDBOX_WORK_DIR
+        value: "/tmp/sandbox_workspace"
+      - key: LOG_DIR
+        value: "/tmp/logs"
+      - key: CHROMA_PERSIST_DIR
+        value: "/tmp/chroma_db"

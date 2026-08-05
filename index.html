@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Octuplex - 目标驱动型自主执行AI智能系统">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>Octuplex - 自主执行AI智能系统</title>
+
+    <!-- highlight.js 代码高亮 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        /* ============================================================
+           Octuplex 全局样式 - 深色主题 + 移动端自适应
+           ============================================================ */
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a28;
+            --bg-card: #161622;
+            --border-color: #2a2a3a;
+            --border-active: #4a6cf7;
+            --text-primary: #e8e8f0;
+            --text-secondary: #9898b0;
+            --text-muted: #686880;
+            --accent: #4a6cf7;
+            --accent-hover: #5b7df8;
+            --accent-glow: rgba(74, 108, 247, 0.15);
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --user-bubble: #1a2744;
+            --ai-bubble: #1a1a28;
+            --code-bg: #0d0d16;
+            --scrollbar-thumb: #2a2a3a;
+            --scrollbar-track: #0a0a0f;
+            --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+        /* 顶部导航栏 */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            font-weight: 700;
+        }
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .header-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .header-btn:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+        .header-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* 主内容区 */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 聊天区域 */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 消息气泡 */
+        .message {
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            align-self: flex-end;
+        }
+        .message.ai {
+            align-self: flex-start;
+        }
+        .message-content {
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            line-height: 1.6;
+            font-size: 14px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .message.user .message-content {
+            background: var(--user-bubble);
+            border: 1px solid rgba(74, 108, 247, 0.3);
+            border-bottom-right-radius: var(--radius-sm);
+        }
+        .message.ai .message-content {
+            background: var(--ai-bubble);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+        .message-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            padding: 0 8px;
+        }
+        .message.user .message-meta { text-align: right; }
+        .message.ai .message-meta { text-align: left; }
+
+        /* 代码块 */
+        .message-content pre {
+            background: var(--code-bg);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            overflow-x: auto;
+            margin: 8px 0;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        .message-content pre code {
+            font-family: var(--font-mono);
+            background: none;
+            padding: 0;
+        }
+        .message-content code {
+            background: rgba(74, 108, 247, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        /* 进度条 */
+        .progress-bar-container {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            height: 8px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #7c3aed);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        /* 统计卡片 */
+        .stats-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .stats-row:last-child { border-bottom: none; }
+        .stats-label { color: var(--text-secondary); }
+        .stats-value { color: var(--text-primary); font-weight: 600; }
+        .stats-value.warning { color: var(--warning); }
+        .stats-value.danger { color: var(--error); }
+
+        /* 输入区域 */
+        .input-area {
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        .chat-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            resize: none;
+            min-height: 44px;
+            max-height: 150px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .chat-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .chat-input::placeholder { color: var(--text-muted); }
+        .send-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .input-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .input-action-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .input-action-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        .file-input-hidden { display: none; }
+
+        /* 侧边面板 */
+        .side-panel {
+            width: 340px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: none;
+            flex-direction: column;
+        }
+        .side-panel.visible { display: flex; }
+        .panel-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .panel-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            line-height: 1;
+        }
+        .panel-close-btn:hover { color: var(--text-primary); }
+        .panel-content {
+            padding: 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 技能卡片 */
+        .skill-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .skill-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .skill-card-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .skill-card-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .skill-toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+        }
+        .skill-toggle input { display: none; }
+        .skill-toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            transition: 0.3s;
+            border: 1px solid var(--border-color);
+        }
+        .skill-toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+        .skill-toggle input:checked + .skill-toggle-slider {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .skill-toggle input:checked + .skill-toggle-slider::before {
+            transform: translateX(20px);
+            background: white;
+        }
+
+        /* 任务列表 */
+        .task-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .task-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .task-item-name { font-weight: 600; }
+        .task-item-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .task-item-status.running { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+        .task-item-status.completed { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .task-item-status.failed { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+        .task-item-cron { font-size: 11px; color: var(--text-muted); }
+
+        /* 日志项 */
+        .log-item {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 4px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            word-break: break-all;
+        }
+        .log-item.info { color: var(--text-secondary); }
+        .log-item.success { color: var(--success); }
+        .log-item.warning { color: var(--warning); }
+        .log-item.error { color: var(--error); }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            font-size: 13px;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--error); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 40px;
+            gap: 12px;
+        }
+        .empty-state-icon { font-size: 48px; opacity: 0.5; }
+        .empty-state-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); }
+        .empty-state-desc { font-size: 13px; max-width: 300px; line-height: 1.6; }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .side-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                z-index: 200;
+            }
+            .message { max-width: 92%; }
+            .header-btn span.btn-text { display: none; }
+            .header-btn { padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="header-logo">O</div>
+            <span>Octuplex</span>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="togglePanel('stats')" id="btnStats" title="消耗看板">
+                📊 <span class="btn-text">消耗</span>
+            </button>
+            <button class="header-btn" onclick="togglePanel('skills')" id="btnSkills" title="技能管理">
+                🧩 <span class="btn-text">技能</span>
+            </button>
+            <button class="header-btn" onclick="togglePanel('tasks')" id="btnTasks" title="定时任务">
+                ⏰ <span class="btn-text">任务</span>
+            </button>
+            <button class="header-btn" onclick="togglePanel('logs')" id="btnLogs" title="执行日志">
+                📋 <span class="btn-text">日志</span>
+            </button>
+            <button class="header-btn" onclick="clearChat()" title="清空对话">
+                🗑️
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div class="main-container">
+        <!-- 聊天区域 -->
+        <div class="chat-area" id="chatArea">
+            <div class="chat-messages" id="chatMessages">
+                <!-- 欢迎消息 -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">⚡</div>
+                    <div class="empty-state-title">Octuplex 自主执行AI智能系统</div>
+                    <div class="empty-state-desc">
+                        输入您的目标或问题，AI将自动拆解任务、编写代码、联网检索、执行操作并汇总结果。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-area">
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <textarea class="chat-input" id="chatInput" rows="1"
+                            placeholder="输入您的目标或问题，例如：帮我分析最近一周的天气数据..."
+                            onkeydown="handleKeyDown(event)"></textarea>
+                    </div>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="发送">
+                        ▶
+                    </button>
+                </div>
+                <div class="input-actions">
+                    <button class="input-action-btn" onclick="document.getElementById('fileInput').click()">
+                        📎 上传文件
+                    </button>
+                    <input type="file" class="file-input-hidden" id="fileInput" multiple
+                        onchange="handleFileUpload(event)" accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.py,.js,.jpg,.png,.gif">
+                    <button class="input-action-btn" id="cancelBtn" onclick="cancelTask()" style="display:none">
+                        ⏹ 取消任务
+                    </button>
+                    <span id="fileUploadStatus" style="font-size:11px;color:var(--text-muted);margin-left:8px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 消耗看板 -->
+        <div class="side-panel" id="panelStats">
+            <div class="panel-header">
+                📊 Token消耗看板
+                <button class="panel-close-btn" onclick="closePanel('stats')">✕</button>
+            </div>
+            <div class="panel-content" id="statsContent">
+                <div class="stats-card">
+                    <div class="stats-row"><span class="stats-label">今日输入Token</span><span class="stats-value" id="statDailyIn">0</span></div>
+                    <div class="stats-row"><span class="stats-label">今日输出Token</span><span class="stats-value" id="statDailyOut">0</span></div>
+                    <div class="stats-row"><span class="stats-label">今日合计</span><span class="stats-value" id="statDailyTotal">0</span></div>
+                    <div class="stats-row"><span class="stats-label">今日限额</span><span class="stats-value" id="statDailyLimit">未设置</span></div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-row"><span class="stats-label">会话输入Token</span><span class="stats-value" id="statSessionIn">0</span></div>
+                    <div class="stats-row"><span class="stats-label">会话输出Token</span><span class="stats-value" id="statSessionOut">0</span></div>
+                    <div class="stats-row"><span class="stats-label">会话合计</span><span class="stats-value" id="statSessionTotal">0</span></div>
+                    <div class="stats-row"><span class="stats-label">会话限额</span><span class="stats-value" id="statSessionLimit">未设置</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技能管理面板 -->
+        <div class="side-panel" id="panelSkills">
+            <div class="panel-header">
+                🧩 技能管理
+                <button class="panel-close-btn" onclick="closePanel('skills')">✕</button>
+            </div>
+            <div class="panel-content" id="skillsContent">
+                <div style="color:var(--text-muted);text-align:center;padding:20px;">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 定时任务面板 -->
+        <div class="side-panel" id="panelTasks">
+            <div class="panel-header">
+                ⏰ 定时任务
+                <button class="panel-close-btn" onclick="closePanel('tasks')">✕</button>
+            </div>
+            <div class="panel-content" id="tasksContent">
+                <div style="margin-bottom:12px;">
+                    <button class="header-btn" onclick="showAddTaskForm()" style="width:100%;justify-content:center;">
+                        ➕ 添加定时任务
+                    </button>
+                </div>
+                <div id="taskList"></div>
+                <div id="addTaskForm" style="display:none;margin-top:12px;">
+                    <div class="stats-card">
+                        <input type="text" id="taskJobId" placeholder="任务ID（英文）" style="width:100%;margin-bottom:8px;padding:6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-primary);font-size:13px;">
+                        <input type="text" id="taskCron" placeholder="Cron表达式，如: 0 8 * * *" style="width:100%;margin-bottom:8px;padding:6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-primary);font-size:13px;">
+                        <input type="text" id="taskContent" placeholder="任务内容" style="width:100%;margin-bottom:8px;padding:6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-primary);font-size:13px;">
+                        <div style="display:flex;gap:8px;">
+                            <button class="header-btn" onclick="addScheduledTask()" style="flex:1;justify-content:center;">✅ 确认</button>
+                            <button class="header-btn" onclick="hideAddTaskForm()" style="flex:1;justify-content:center;">❌ 取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 执行日志面板 -->
+        <div class="side-panel" id="panelLogs">
+            <div class="panel-header">
+                📋 执行日志
+                <button class="panel-close-btn" onclick="closePanel('logs')">✕</button>
+            </div>
+            <div class="panel-content" id="logsContent">
+                <div style="color:var(--text-muted);text-align:center;padding:20px;">暂无日志</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================================
+           Octuplex 前端主逻辑
+           功能：WebSocket通信、流式渲染、进度可视化、消耗看板、技能管理
+           ============================================================ */
+
+        // ---- 配置（部署时修改此处） ----
+        const CONFIG = {
+            // 后端HTTP接口地址（Render 部署）
+            API_BASE_URL: 'https://octuplex-backend.onrender.com',
+            // WebSocket地址（Render 部署）
+            WS_URL: 'wss://octuplex-backend.onrender.com/ws',
+            // 会话ID
+            SESSION_ID: 'session_' + Date.now(),
+            // 重连间隔（毫秒）
+            RECONNECT_INTERVAL: 3000,
+            // 最大重连次数
+            MAX_RECONNECT: 10
+        };
+
+        // ---- 全局状态 ----
+        let ws = null;
+        let reconnectCount = 0;
+        let isProcessing = false;
+        let currentActivePanel = null;
+        let db = null; // IndexedDB引用
+
+        // ---- IndexedDB初始化 ----
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('OctuplexDB', 1);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('conversations')) {
+                        db.createObjectStore('conversations', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('preferences')) {
+                        db.createObjectStore('preferences', { keyPath: 'key' });
+                    }
+                    if (!db.objectStoreNames.contains('files')) {
+                        db.createObjectStore('files', { keyPath: 'name' });
+                    }
+                };
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        // 保存对话到IndexedDB
+        function saveConversation() {
+            if (!db) return;
+            const messages = document.getElementById('chatMessages').innerHTML;
+            const tx = db.transaction('conversations', 'readwrite');
+            const store = tx.objectStore('conversations');
+            store.put({ id: 'current', content: messages, updatedAt: Date.now() });
+        }
+
+        // 从IndexedDB恢复对话
+        async function loadConversation() {
+            if (!db) return;
+            const tx = db.transaction('conversations', 'readonly');
+            const store = tx.objectStore('conversations');
+            const req = store.get('current');
+            req.onsuccess = () => {
+                if (req.result) {
+                    document.getElementById('chatMessages').innerHTML = req.result.content;
+                    document.getElementById('emptyState').style.display = 'none';
+                    scrollToBottom();
+                    // 重新高亮代码块
+                    document.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+                }
+            };
+        }
+
+        // ---- WebSocket连接 ----
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) return;
+
+            const wsUrl = CONFIG.WS_URL + '/' + CONFIG.SESSION_ID;
+            console.log('[Octuplex] 连接WebSocket:', wsUrl);
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    console.log('[Octuplex] WebSocket已连接');
+                    reconnectCount = 0;
+                    addLog('info', 'WebSocket连接已建立');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const msg = JSON.parse(event.data);
+                        handleWSMessage(msg);
+                    } catch (e) {
+                        console.error('消息解析失败:', e);
+                    }
+                };
+
+                ws.onclose = (event) => {
+                    console.log('[Octuplex] WebSocket断开:', event.code);
+                    addLog('warning', `WebSocket连接断开 (code: ${event.code})`);
+                    if (reconnectCount < CONFIG.MAX_RECONNECT) {
+                        reconnectCount++;
+                        setTimeout(connectWebSocket, CONFIG.RECONNECT_INTERVAL);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('[Octuplex] WebSocket错误:', error);
+                    addLog('error', 'WebSocket连接错误');
+                };
+            } catch (e) {
+                console.error('WebSocket创建失败:', e);
+            }
+        }
+
+        // 处理WebSocket消息
+        function handleWSMessage(msg) {
+            switch (msg.type) {
+                case 'status':
+                    updateStatus(msg.data);
+                    break;
+                case 'progress':
+                    updateProgress(msg.data);
+                    break;
+                case 'result':
+                    handleResult(msg.data);
+                    break;
+                case 'pong':
+                    break;
+                default:
+                    console.log('未知消息类型:', msg.type);
+            }
+        }
+
+        // ---- 发送消息 ----
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message || isProcessing) return;
+
+            // 清除空状态
+            document.getElementById('emptyState').style.display = 'none';
+
+            // 添加用户消息
+            addMessage('user', message);
+            input.value = '';
+            input.style.height = 'auto';
+            isProcessing = true;
+            updateSendButton();
+            updateCancelButton();
+
+            // 优先使用WebSocket
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'chat',
+                    message: message,
+                    session_id: CONFIG.SESSION_ID
+                }));
+            } else {
+                // 降级到HTTP POST
+                await sendViaHTTP(message);
+            }
+        }
+
+        // HTTP降级发送
+        async function sendViaHTTP(message) {
+            try {
+                addLog('info', '使用HTTP模式发送请求...');
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: CONFIG.SESSION_ID
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    handleResult(result.data);
+                }
+            } catch (error) {
+                addMessage('ai', `❌ 请求失败: ${error.message}`);
+                addLog('error', `HTTP请求失败: ${error.message}`);
+            } finally {
+                isProcessing = false;
+                updateSendButton();
+                updateCancelButton();
+            }
+        }
+
+        // 处理结果
+        function handleResult(data) {
+            isProcessing = false;
+            updateSendButton();
+            updateCancelButton();
+
+            if (data.type === 'error') {
+                addMessage('ai', data.content);
+                return;
+            }
+
+            // 显示AI回复
+            addMessage('ai', data.content || '');
+
+            // 显示执行详情（如果有任务执行）
+            if (data.execution) {
+                const exec = data.execution;
+                const summary = `📊 任务执行完成: ${exec.completed}/${exec.total_steps} 步骤成功`;
+                addMessage('ai', summary + '\n\n' + exec.results.map((r, i) =>
+                    `${r.status === 'success' ? '✅' : '❌'} 步骤${i + 1}: ${r.step.description}\n${r.output}`
+                ).join('\n\n'));
+            }
+
+            // 更新消耗统计
+            if (data.stats) {
+                updateStatsDisplay(data.stats);
+            }
+        }
+
+        // 更新进度
+        function updateProgress(data) {
+            const msgContainer = document.getElementById('chatMessages');
+
+            switch (data.type) {
+                case 'intent':
+                    addProgressMsg(`🔍 意图识别: ${data.intent} (复杂度: ${data.complexity})`);
+                    break;
+                case 'plan':
+                    addProgressMsg(`📋 任务拆解完成，共 ${data.total} 个步骤`);
+                    break;
+                case 'step_start':
+                    addProgressMsg(`▶️ [${data.current}/${data.total}] ${data.step}`);
+                    break;
+                case 'step_retry':
+                    addProgressMsg(`🔄 重试第${data.attempt}次: ${data.step} - ${data.error}`);
+                    break;
+                case 'step_complete':
+                    const icon = data.status === 'success' ? '✅' : '❌';
+                    addProgressMsg(`${icon} [${data.current}/${data.total}] ${data.step}`);
+                    break;
+            }
+        }
+
+        function addProgressMsg(text) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message ai';
+            div.innerHTML = `<div class="message-content" style="font-size:12px;color:var(--text-secondary);">${escapeHtml(text)}</div>`;
+            container.appendChild(div);
+            scrollToBottom();
+        }
+
+        function updateStatus(data) {
+            addLog('info', data.message || JSON.stringify(data));
+        }
+
+        // ---- 添加消息到聊天区 ----
+        function addMessage(role, content) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+
+            const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            const formattedContent = formatContent(content);
+
+            div.innerHTML = `
+                <div class="message-content">${formattedContent}</div>
+                <div class="message-meta">${time}</div>
+            `;
+            container.appendChild(div);
+
+            // 代码高亮
+            div.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+
+            scrollToBottom();
+            saveConversation();
+        }
+
+        // 格式化内容（Markdown简单支持）
+        function formatContent(text) {
+            if (!text) return '';
+            let html = escapeHtml(text);
+
+            // 代码块 ```...```
+            html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                return `<pre><code class="language-${lang || 'plaintext'}">${code.trim()}</code></pre>`;
+            });
+
+            // 行内代码 `...`
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // 粗体 **...**
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+            // 链接 [text](url)
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--accent);">$1</a>');
+
+            // 换行
+            html = html.replace(/\n/g, '<br>');
+
+            // 进度条 [===] 50%
+            html = html.replace(/\[(=+)\]\s*(\d+)%/g, (match, bars, pct) => {
+                return `<div class="progress-text">进度: ${pct}%</div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width:${pct}%"></div></div>`;
+            });
+
+            return html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('chatMessages');
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 50);
+        }
+
+        // ---- 键盘事件 ----
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // ---- 取消任务 ----
+        function cancelTask() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'cancel' }));
+                addLog('warning', '已发送取消任务请求');
+            }
+            isProcessing = false;
+            updateSendButton();
+            updateCancelButton();
+        }
+
+        function updateSendButton() {
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = isProcessing;
+            btn.style.opacity = isProcessing ? '0.5' : '1';
+        }
+
+        function updateCancelButton() {
+            const btn = document.getElementById('cancelBtn');
+            btn.style.display = isProcessing ? 'flex' : 'none';
+        }
+
+        // ---- 清空对话 ----
+        function clearChat() {
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">⚡</div>
+                    <div class="empty-state-title">Octuplex 自主执行AI智能系统</div>
+                    <div class="empty-state-desc">
+                        输入您的目标或问题，AI将自动拆解任务、编写代码、联网检索、执行操作并汇总结果。
+                    </div>
+                </div>`;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'clear_context' }));
+            }
+            saveConversation();
+            addLog('info', '对话已清空');
+        }
+
+        // ---- 文件上传 ----
+        async function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            const statusEl = document.getElementById('fileUploadStatus');
+            statusEl.textContent = `上传中... (${files.length}个文件)`;
+
+            for (const file of files) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('session_id', CONFIG.SESSION_ID);
+
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/api/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        statusEl.textContent = `✅ ${file.name} 上传成功`;
+                        addLog('success', `文件上传: ${file.name} (${formatSize(result.size)})`);
+                        // 存储到IndexedDB
+                        if (db) {
+                            const tx = db.transaction('files', 'readwrite');
+                            tx.objectStore('files').put({
+                                name: file.name,
+                                size: result.size,
+                                path: result.path,
+                                uploadedAt: Date.now()
+                            });
+                        }
+                    } else {
+                        statusEl.textContent = `❌ ${file.name} 上传失败`;
+                        addLog('error', `文件上传失败: ${file.name}`);
+                    }
+                } catch (e) {
+                    statusEl.textContent = `❌ ${file.name} 上传出错`;
+                    addLog('error', `文件上传异常: ${e.message}`);
+                }
+            }
+
+            setTimeout(() => { statusEl.textContent = ''; }, 3000);
+            event.target.value = '';
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // ---- 侧边面板 ----
+        function togglePanel(panelName) {
+            const panel = document.getElementById('panel' + panelName.charAt(0).toUpperCase() + panelName.slice(1));
+            const btn = document.getElementById('btn' + panelName.charAt(0).toUpperCase() + panelName.slice(1));
+
+            if (currentActivePanel === panelName) {
+                closePanel(panelName);
+                return;
+            }
+
+            // 关闭当前面板
+            if (currentActivePanel) {
+                closePanel(currentActivePanel);
+            }
+
+            // 打开新面板
+            panel.classList.add('visible');
+            btn.classList.add('active');
+            currentActivePanel = panelName;
+
+            // 加载面板内容
+            switch (panelName) {
+                case 'stats': loadStats(); break;
+                case 'skills': loadSkills(); break;
+                case 'tasks': loadTasks(); break;
+            }
+        }
+
+        function closePanel(panelName) {
+            const panel = document.getElementById('panel' + panelName.charAt(0).toUpperCase() + panelName.slice(1));
+            const btn = document.getElementById('btn' + panelName.charAt(0).toUpperCase() + panelName.slice(1));
+            panel.classList.remove('visible');
+            btn.classList.remove('active');
+            if (currentActivePanel === panelName) {
+                currentActivePanel = null;
+            }
+        }
+
+        // ---- 消耗统计 ----
+        async function loadStats() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/stats`);
+                const result = await response.json();
+                if (result.success) {
+                    updateStatsDisplay(result.data);
+                }
+            } catch (e) {
+                console.error('加载统计失败:', e);
+            }
+        }
+
+        function updateStatsDisplay(stats) {
+            document.getElementById('statDailyIn').textContent = stats.daily_input_tokens?.toLocaleString() || '0';
+            document.getElementById('statDailyOut').textContent = stats.daily_output_tokens?.toLocaleString() || '0';
+            document.getElementById('statDailyTotal').textContent = stats.daily_total?.toLocaleString() || '0';
+            document.getElementById('statDailyLimit').textContent = stats.daily_limit > 0 ? stats.daily_limit.toLocaleString() : '未设置';
+
+            document.getElementById('statSessionIn').textContent = stats.session_input_tokens?.toLocaleString() || '0';
+            document.getElementById('statSessionOut').textContent = stats.session_output_tokens?.toLocaleString() || '0';
+            document.getElementById('statSessionTotal').textContent = stats.session_total?.toLocaleString() || '0';
+            document.getElementById('statSessionLimit').textContent = stats.session_limit > 0 ? stats.session_limit.toLocaleString() : '未设置';
+
+            // 限额警告
+            if (stats.daily_limit > 0 && stats.daily_total > stats.daily_limit * 0.8) {
+                document.getElementById('statDailyTotal').classList.add('warning');
+            }
+            if (stats.session_limit > 0 && stats.session_total > stats.session_limit * 0.8) {
+                document.getElementById('statSessionTotal').classList.add('warning');
+            }
+        }
+
+        // ---- 技能管理 ----
+        async function loadSkills() {
+            const container = document.getElementById('skillsContent');
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/skills`);
+                const result = await response.json();
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = result.data.map(skill => `
+                        <div class="skill-card">
+                            <div class="skill-card-header">
+                                <span class="skill-card-name">${skill.name}</span>
+                                <label class="skill-toggle">
+                                    <input type="checkbox" ${skill.enabled ? 'checked' : ''}
+                                        onchange="toggleSkill('${skill.name}', this.checked)">
+                                    <span class="skill-toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="skill-card-desc">${skill.description || '无描述'}</div>
+                            <div style="font-size:11px;color:var(--text-muted);">
+                                v${skill.version} | 成功率: ${calcSuccessRate(skill.stats)}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;">暂无已安装技能</div>';
+                }
+            } catch (e) {
+                container.innerHTML = `<div style="color:var(--error);text-align:center;padding:20px;">加载失败: ${e.message}</div>`;
+            }
+        }
+
+        function calcSuccessRate(stats) {
+            if (!stats) return 'N/A';
+            const total = (stats.success || 0) + (stats.fail || 0);
+            if (total === 0) return 'N/A';
+            return Math.round((stats.success / total) * 100) + '%';
+        }
+
+        async function toggleSkill(name, enabled) {
+            try {
+                const formData = new FormData();
+                formData.append('enabled', enabled);
+                await fetch(`${CONFIG.API_BASE_URL}/api/skills/${name}/toggle`, {
+                    method: 'POST',
+                    body: formData
+                });
+                showToast(enabled ? `技能 "${name}" 已启用` : `技能 "${name}" 已禁用`, 'success');
+            } catch (e) {
+                showToast(`操作失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ---- 定时任务 ----
+        async function loadTasks() {
+            const container = document.getElementById('taskList');
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/schedule`);
+                const result = await response.json();
+                if (result.success && Object.keys(result.data).length > 0) {
+                    container.innerHTML = Object.entries(result.data).map(([id, task]) => `
+                        <div class="task-item">
+                            <div class="task-item-header">
+                                <span class="task-item-name">${id}</span>
+                                <span class="task-item-status running">⏳</span>
+                            </div>
+                            <div class="task-item-cron">Cron: ${task.cron}</div>
+                            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${task.user_input}</div>
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">下次执行: ${task.next_run || 'N/A'}</div>
+                            <button class="header-btn" onclick="deleteTask('${id}')" style="margin-top:6px;font-size:11px;color:var(--error);">删除</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:10px;">暂无定时任务</div>';
+                }
+            } catch (e) {
+                container.innerHTML = `<div style="color:var(--error);text-align:center;padding:10px;">加载失败</div>`;
+            }
+        }
+
+        function showAddTaskForm() {
+            document.getElementById('addTaskForm').style.display = 'block';
+        }
+
+        function hideAddTaskForm() {
+            document.getElementById('addTaskForm').style.display = 'none';
+        }
+
+        async function addScheduledTask() {
+            const jobId = document.getElementById('taskJobId').value.trim();
+            const cron = document.getElementById('taskCron').value.trim();
+            const content = document.getElementById('taskContent').value.trim();
+
+            if (!jobId || !cron || !content) {
+                showToast('请填写所有字段', 'warning');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('job_id', jobId);
+                formData.append('cron_expr', cron);
+                formData.append('user_input', content);
+
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/schedule`, {
+                    method: 'POST', body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('定时任务已添加', 'success');
+                    hideAddTaskForm();
+                    loadTasks();
+                    document.getElementById('taskJobId').value = '';
+                    document.getElementById('taskCron').value = '';
+                    document.getElementById('taskContent').value = '';
+                }
+            } catch (e) {
+                showToast(`添加失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function deleteTask(jobId) {
+            try {
+                await fetch(`${CONFIG.API_BASE_URL}/api/schedule/${jobId}`, { method: 'DELETE' });
+                showToast('任务已删除', 'success');
+                loadTasks();
+            } catch (e) {
+                showToast(`删除失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ---- 日志 ----
+        function addLog(level, message) {
+            const container = document.getElementById('logsContent');
+            const time = new Date().toLocaleTimeString('zh-CN');
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${level}`;
+            logItem.textContent = `[${time}] ${message}`;
+            container.appendChild(logItem);
+
+            // 保留最近200条日志
+            while (container.children.length > 200) {
+                container.removeChild(container.firstChild);
+            }
+
+            // 滚动
+            container.parentElement.scrollTop = container.parentElement.scrollHeight;
+        }
+
+        // ---- Toast提示 ----
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ---- 导出对话 ----
+        function exportConversation() {
+            const messages = document.getElementById('chatMessages');
+            let markdown = '# Octuplex 对话记录\n\n';
+            markdown += `导出时间: ${new Date().toISOString()}\n\n---\n\n`;
+
+            messages.querySelectorAll('.message').forEach(msg => {
+                const role = msg.classList.contains('user') ? '👤 用户' : '🤖 Octuplex';
+                const content = msg.querySelector('.message-content').textContent;
+                markdown += `### ${role}\n${content}\n\n`;
+            });
+
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `octuplex_conversation_${Date.now()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('对话已导出为Markdown文件', 'success');
+        }
+
+        // ---- 初始化 ----
+        async function init() {
+            await initDB();
+            await loadConversation();
+            connectWebSocket();
+
+            // 定期心跳
+            setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'ping' }));
+                }
+            }, 30000);
+
+            // 定期刷新统计
+            setInterval(() => {
+                if (currentActivePanel === 'stats') {
+                    loadStats();
+                }
+            }, 10000);
+
+            // 输入框自动调整高度
+            document.getElementById('chatInput').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+
+            console.log('[Octuplex] 前端初始化完成');
+            console.log('  会话ID:', CONFIG.SESSION_ID);
+            console.log('  API地址:', CONFIG.API_BASE_URL);
+            console.log('  WebSocket:', CONFIG.WS_URL);
+        }
+
+        // 启动
+        init();
+    </script>
+</body>
+</html>
