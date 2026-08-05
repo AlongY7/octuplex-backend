@@ -16,15 +16,69 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           pip install huggingface_hub --quiet
-          python3 -c "
-          from huggingface_hub import HfApi
+          python3 << 'PYEOF'
+          from huggingface_hub import HfApi, create_repo, login
+          import os
+          
+          token = os.environ["HF_TOKEN"]
+          login(token=token)
           api = HfApi()
+          
+          # 先创建Space（如果不存在）
+          print("创建/检查 Space: alongy7/octuplex-backend")
+          try:
+              create_repo(
+                  repo_id="alongy7/octuplex-backend",
+                  repo_type="space",
+                  space_sdk="docker",
+                  token=token,
+                  exist_ok=True
+              )
+              print("✅ Space 已就绪")
+          except Exception as e:
+              print(f"⚠️ Space 创建异常（可能已存在）: {e}")
+          
+          # 上传所有文件
+          print("上传后端文件...")
           api.upload_folder(
-              folder_path='.',
-              repo_id='alongy7/octuplex-backend',
-              repo_type='space',
-              space_sdk='docker',
-              token='$HF_TOKEN'
+              folder_path=".",
+              repo_id="alongy7/octuplex-backend",
+              repo_type="space",
+              token=token
           )
-          print('✅ 部署完成！')
-          "
+          print("✅ 部署完成！")
+          PYEOF
+
+      - name: Set Space Secrets
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install huggingface_hub --quiet
+          python3 << 'PYEOF'
+          from huggingface_hub import HfApi
+          import os
+          
+          token = os.environ["HF_TOKEN"]
+          api = HfApi()
+          
+          # 设置Space环境变量
+          secrets = {
+              "CORS_ORIGINS": "https://alongy7.github.io",
+              "SERVER_PORT": "7860",
+              "SERVER_HOST": "0.0.0.0",
+          }
+          
+          for key, value in secrets.items():
+              try:
+                  api.add_space_secret(
+                      repo_id="alongy7/octuplex-backend",
+                      key=key,
+                      value=value,
+                      token=token
+                  )
+                  print(f"✅ Secret {key} 已设置")
+              except Exception as e:
+                  print(f"⚠️ Secret {key}: {e}")
+          
+          print("✅ 环境变量配置完成！")
+          PYEOF
