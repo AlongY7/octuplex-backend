@@ -1,6 +1,6 @@
 # ============================================================
 # Render Blueprint 配置文件
-# 使用 Docker 部署（避免原生 Python 环境内存不足）
+# Docker 部署（避免原生 Python 环境内存不足）
 # ============================================================
 
 services:
@@ -11,8 +11,6 @@ services:
     plan: free
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: "10000"
       - key: SERVER_HOST
         value: "0.0.0.0"
       - key: CORS_ORIGINS
