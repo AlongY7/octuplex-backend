@@ -1,4 +1,4 @@
-# Octuplex Hugging Face Space Dockerfile
+# Octuplex Render Dockerfile
 FROM python:3.11-slim
 
 # 设置工作目录
@@ -22,8 +22,9 @@ COPY . .
 # 创建运行时目录
 RUN mkdir -p sandbox_workspace chroma_db logs uploads
 
-# 暴露端口
-EXPOSE 7860
+# Render 会注入 PORT 环境变量，默认10000
+ENV PORT=10000
+EXPOSE 10000
 
 # 启动命令
 CMD ["python3", "app.py"]
